@@ -3,11 +3,13 @@
 #include <string>
 using namespace std;
 
-// ===================== INTEGRANTE 1: Voto, Block y la funcion hash =====================
+
+// Integrante 1
 
 string aHexadecimal(unsigned long long numero){
     string simbolos = "0123456789abcdef";
     string resultado = "";
+
     for(int i = 0; i < 16; i++){
         resultado = simbolos[numero % 16] + resultado;
         numero = numero / 16;
@@ -19,11 +21,13 @@ class Voto{
 public:
     string idVotante;
     string opcion;
+
     Voto(string id, string op){
         idVotante = id;
         opcion = op;
     }
 };
+
 
 class Block{
 public:
@@ -38,14 +42,17 @@ public:
         hashAnterior = anterior;
         votos = v;
         nonce = 0;
+
         miHash = sacarHash();
     }
 
     string sacarHash(){
         string juntado = to_string(indice) + hashAnterior + to_string(nonce);
+
         for(int i = 0; i < votos.size(); i++){
             juntado = juntado + votos[i].idVotante + votos[i].opcion;
         }
+
         unsigned long long suma = 0;
         for(int i = 0; i < juntado.size(); i++){
             suma = suma * 31 + juntado[i];
@@ -54,7 +61,9 @@ public:
     }
 };
 
-// ===================== INTEGRANTE 2: Blockchain (Singleton), minado y validacion =====================
+
+
+// Integrante 2
 
 class Blockchain{
 private:
@@ -68,6 +77,7 @@ private:
     }
 
 public:
+
     static Blockchain* getInstance(){
         if(instancia == nullptr){
             instancia = new Blockchain();
@@ -79,6 +89,7 @@ public:
         return bloques[bloques.size() - 1];
     }
 
+
     void agregarBloque(Block b){
         bloques.push_back(b);
     }
@@ -88,7 +99,9 @@ public:
         for(int i = 0; i < dificultad; i++){
             ceros = ceros + "0";
         }
+
         Block& actual = bloques[bloques.size() - 1];
+
         while(actual.miHash.substr(0, dificultad) != ceros){
             actual.nonce++;
             actual.miHash = actual.sacarHash();
@@ -99,6 +112,7 @@ public:
         for(int i = 1; i < bloques.size(); i++){
             Block actual = bloques[i];
             Block anterior = bloques[i - 1];
+
             if(actual.miHash != actual.sacarHash()){
                 return false;
             }
@@ -112,12 +126,15 @@ public:
 
 Blockchain* Blockchain::instancia = nullptr;
 
-// ===================== INTEGRANTE 3: Observer (interfaz, mesa y centro electoral) =====================
+
+
+// Integrante 3
 
 class MesaElectoralObserver{
 public:
     virtual void update(Block nuevoBloque) = 0;
 };
+
 
 class MesaElectoral : public MesaElectoralObserver{
 public:
@@ -126,14 +143,17 @@ public:
 
     MesaElectoral(string n){
         nombre = n;
+
         Block genesis = Blockchain::getInstance()->ultimoBloque();
         miCadena.push_back(genesis);
     }
 
     void update(Block nuevoBloque){
         Block ultimo = miCadena[miCadena.size() - 1];
+
         bool hashBien = (nuevoBloque.miHash == nuevoBloque.sacarHash());
         bool enlaceBien = (nuevoBloque.hashAnterior == ultimo.miHash);
+
         if(hashBien && enlaceBien){
             miCadena.push_back(nuevoBloque);
             cout << nombre << " recibio el bloque " << nuevoBloque.indice
@@ -147,16 +167,19 @@ public:
 class CentroElectoralSubject{
 private:
     vector<MesaElectoralObserver*> mesas;
+
 public:
     void attach(MesaElectoralObserver* m){
         mesas.push_back(m);
     }
+
     void notificarNuevoBloque(Block b){
         for(int i = 0; i < mesas.size(); i++){
             mesas[i]->update(b);
         }
     }
 };
+
 
 int main(){
     Blockchain* cadena = Blockchain::getInstance();
@@ -170,6 +193,7 @@ int main(){
     red.attach(&mesa2);
     red.attach(&mesa3);
 
+
     vector<Voto> votos;
     votos.push_back(Voto("id01", "Candidato A"));
     votos.push_back(Voto("id02", "Candidato B"));
@@ -180,6 +204,7 @@ int main(){
 
     cout << "Minando el bloque de votos..." << endl;
     cadena->mineBlock(2);
+
     cout << "Bloque sellado con hash: " << cadena->ultimoBloque().miHash << endl;
     cout << "Nonce encontrado: " << cadena->ultimoBloque().nonce << endl;
     cout << endl;
