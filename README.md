@@ -12,6 +12,9 @@ Mesa Sur recibio el bloque 1 y lo agrego. Ahora tiene 2 bloques.
 
 La cadena oficial es valida? Si
 
+
+-------------------------------------
+
 Integrantes: 
 
 - Kaufman, Corbin
